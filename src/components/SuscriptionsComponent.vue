@@ -41,12 +41,15 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 
 const props = defineProps(["subscriptions"]);
 const filter = ref('');
 const sortColumn = ref('');
 const sortDi = ref('');
+
+const result = ref(0);
+const total = ref(0);
 
 const columns = [
     'Nombre',
@@ -68,6 +71,7 @@ const sortTableColumn = (nameColumn) => {
 const sortData = computed(() => {
     return [...props.subscriptions].sort((a,b) => {
         const direction = sortDi.value === 'asc' ? 1: -1;
+
         return a[sortColumn.value] > b[sortColumn.value] ? direction : -direction;
     })
 });
@@ -87,8 +91,35 @@ const getSort = (column) => {
 
 
 const totalMoneyMountly = computed(() => {
-   return filterData.value.reduce((sum, sub) => sum + parseFloat(sub.Precio),0).toFixed(2)
+
+   return filterData.value.reduce((sum, sub) => {
+
+        const precio = parseFloat(sub.Precio);
+
+        if (isNaN(sub.Precio)) {
+            alert("Precio invalido: NaN");
+            return sum;
+        }
+
+        if(sub.Tipo === 'Anual') {
+            return sum + (precio/3);
+        }
+
+        else if (sub.Tipo === 'Trimestral') {
+            return sum + (precio/3); 
+        } 
+
+        else if (sub.Tipo === 'Semestral') {
+            return sum + (precio/6); 
+        } 
+        
+        else {
+            return sum + precio;
+        }
+   },0);
+
 });
+
 
 </script>
 
